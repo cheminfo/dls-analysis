@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DLS Analysis Demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2em;
+      }
+      .container {
+        max-width: 700px;
+        margin: auto;
+      }
+      .section {
+        margin-bottom: 2em;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 1em;
+        border-radius: 5px;
+      }
+      label {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>DLS Analysis Demo</h1>
+      <div class="section">
+        <label for="zmesFile">Load a Zmes file:</label>
+        <input type="file" id="zmesFile" accept=".zmes" />
+      </div>
+      <div id="results"></div>
+    </div>
+    <script src="../dist/dls-analysis.umd.js"></script>
+    <script>
+      document
+        .getElementById('zmesFile')
+        .addEventListener('change', async (event) => {
+          const file = event.target.files[0];
+          if (!file) return;
+          const arrayBuffer = await file.arrayBuffer();
+          const measurements = await ZmesParser.fromZmes(
+            new Uint8Array(arrayBuffer),
+          );
+          console.log(measurements);
+          const container = document.getElementById('results');
+          container.innerHTML = '';
+          for (const measurement of measurements) {
+            const section = document.createElement('div');
+            section.className = 'section';
+            section.innerHTML = `
+              <h2>${measurement.title} (${measurement.dataType})</h2>
+              <h3>Meta</h3>
+              <pre>${JSON.stringify(measurement.meta, null, 2)}</pre>
+              <h3>Settings</h3>
+              <pre>${JSON.stringify(measurement.settings, null, 2)}</pre>
+              <h3>Variables</h3>
+              <pre>${JSON.stringify(measurement.variables, null, 2)}</pre>
+            `;
+            container.appendChild(section);
+          }
+        });
+    </script>
+  </body>
+</html>

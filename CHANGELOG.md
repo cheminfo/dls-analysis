@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/cheminfo/dls-analysis/compare/v1.1.0...v1.1.1) (2026-02-26)
+
+
+### Bug Fixes
+
+* expose JSGraph and fromJcamp fromJcamps ([198e927](https://github.com/cheminfo/dls-analysis/commit/198e9279791c87927d1c177c3a6b677babca5c92))
+
 ## [1.1.0](https://github.com/cheminfo/dls-analysis/compare/v1.0.0...v1.1.0) (2026-02-26)
 
 

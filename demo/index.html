@@ -43,11 +43,11 @@
           const file = event.target.files[0];
           if (!file) return;
           const arrayBuffer = await file.arrayBuffer();
-          const measurements = await ZmesParser.fromZmes(arrayBuffer);
-          console.log(measurements);
+          const analysis = await ZmesParser.fromZmes(arrayBuffer);
+          console.log(analysis);
           const container = document.getElementById('results');
           container.innerHTML = '';
-          for (const measurement of measurements) {
+          for (const measurement of analysis.spectra) {
             const section = document.createElement('div');
             section.className = 'section';
             section.innerHTML = `

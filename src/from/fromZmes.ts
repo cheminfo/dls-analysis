@@ -3,6 +3,7 @@ import type {
   MeasurementXY,
   MeasurementXYVariables,
 } from 'cheminfo-types';
+import { Analysis } from 'common-spectrum';
 import type { ZmesFile } from 'zmes-parser';
 import { parse } from 'zmes-parser';
 
@@ -117,10 +118,17 @@ const VARIABLE_DESCRIPTORS: VariableDescriptor[] = [
   },
 ];
 
+interface FromZmesOptions {
+  /** Unique identifier for the analysis. */
+  id?: string;
+  /** Human-readable label for the analysis. */
+  label?: string;
+}
+
 /**
- * Parse a raw .zmes file and convert it into an array of MeasurementXY objects.
+ * Parse a raw .zmes file and create an Analysis.
  *
- * Each record in the file produces one MeasurementXY with multiple variables:
+ * Each record in the file is pushed as a spectrum with multiple variables:
  * - x: Sizes (particle diameter in nm)
  * - y: Particle Size Intensity Distribution (%)
  * - v: Particle Size Volume Distribution (%)
@@ -133,13 +141,15 @@ const VARIABLE_DESCRIPTORS: VariableDescriptor[] = [
  * Only variables present in the data are included. A record is skipped
  * if the required x (Sizes) or y (Intensity) variable is missing.
  * @param data - The raw ArrayBuffer contents of a .zmes file
- * @returns Array of MeasurementXY objects, one per record
+ * @param options - Options for the analysis
+ * @returns An Analysis containing one spectrum per record
  */
 export async function fromZmes(
   data: ArrayBuffer,
-): Promise<Array<MeasurementXY<Float64Array>>> {
+  options: FromZmesOptions = {},
+): Promise<Analysis> {
+  const analysis = new Analysis(options);
   const zmesFile = await parse(data);
-  const measurements: Array<MeasurementXY<Float64Array>> = [];
 
   for (const record of zmesFile.records) {
     const { parameters } = record;
@@ -149,17 +159,20 @@ export async function fromZmes(
       continue;
     }
 
-    measurements.push({
+    analysis.pushSpectrum(variables, {
       id: record.guid,
       title: extractTitle(parameters),
       dataType: 'Size measurement',
       meta: extractMeta(parameters),
-      settings: extractSettings(parameters),
-      variables,
     });
+
+    const spectrum = analysis.spectra.at(-1);
+    if (spectrum) {
+      spectrum.settings = extractSettings(parameters);
+    }
   }
 
-  return measurements;
+  return analysis;
 }
 
 /**

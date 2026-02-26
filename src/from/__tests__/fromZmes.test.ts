@@ -1,7 +1,7 @@
 import { openAsBlob } from 'node:fs';
 import { join } from 'node:path';
 
-import type { MeasurementXY } from 'cheminfo-types';
+import type { Analysis } from 'common-spectrum';
 import { expect, test } from 'vitest';
 
 import { fromZmes } from '../../index.ts';
@@ -9,91 +9,91 @@ import { fromZmes } from '../../index.ts';
 const testFilePath = join(import.meta.dirname, 'data/test.zmes');
 
 /**
- * Load and convert the test .zmes file.
- * @returns Array of MeasurementXY from the test file
+ * Load and parse the test .zmes file into an Analysis.
+ * @returns Analysis from the test file
  */
-async function loadMeasurements(): Promise<Array<MeasurementXY<Float64Array>>> {
+async function loadAnalysis(): Promise<Analysis> {
   const blob = await openAsBlob(testFilePath);
   const arrayBuffer = await blob.arrayBuffer();
   return fromZmes(arrayBuffer);
 }
 
-test('one record produces one MeasurementXY', async () => {
-  const measurements = await loadMeasurements();
+test('one record produces one spectrum', async () => {
+  const analysis = await loadAnalysis();
 
-  expect(measurements).toHaveLength(2);
-  expect(measurements[0]?.dataType).toBe('Size measurement');
+  expect(analysis.spectra).toHaveLength(2);
+  expect(analysis.spectra[0]?.dataType).toBe('Size measurement');
 });
 
 test('x variable contains Sizes data', async () => {
-  const measurements = await loadMeasurements();
-  const measurement = measurements[0];
+  const analysis = await loadAnalysis();
+  const spectrum = analysis.spectra[0];
 
-  expect(measurement).toBeDefined();
-  expect(measurement?.variables.x.data).toBeInstanceOf(Float64Array);
-  expect(measurement?.variables.x.data).toHaveLength(70);
-  expect(measurement?.variables.x.label).toBe('Particle diameter');
-  expect(measurement?.variables.x.units).toBe('nm');
-  expect(measurement?.variables.x.isDependent).toBe(false);
-  expect(measurement?.variables.x.data[0]).toBeCloseTo(0.3, 5);
-  expect(measurement?.variables.x.data[69]).toBeCloseTo(10000, 0);
+  expect(spectrum).toBeDefined();
+  expect(spectrum?.variables.x.data).toBeInstanceOf(Float64Array);
+  expect(spectrum?.variables.x.data).toHaveLength(70);
+  expect(spectrum?.variables.x.label).toBe('Particle diameter');
+  expect(spectrum?.variables.x.units).toBe('nm');
+  expect(spectrum?.variables.x.isDependent).toBe(false);
+  expect(spectrum?.variables.x.data[0]).toBeCloseTo(0.3, 5);
+  expect(spectrum?.variables.x.data[69]).toBeCloseTo(10000, 0);
 });
 
 test('y variable contains intensity distribution', async () => {
-  const measurements = await loadMeasurements();
-  const measurement = measurements[0];
+  const analysis = await loadAnalysis();
+  const spectrum = analysis.spectra[0];
 
-  expect(measurement).toBeDefined();
-  expect(measurement?.variables.y.data).toBeInstanceOf(Float64Array);
-  expect(measurement?.variables.y.data).toHaveLength(70);
-  expect(measurement?.variables.y.label).toBe('Intensity');
-  expect(measurement?.variables.y.units).toBe('%');
-  expect(measurement?.variables.y.isDependent).toBe(true);
+  expect(spectrum).toBeDefined();
+  expect(spectrum?.variables.y.data).toBeInstanceOf(Float64Array);
+  expect(spectrum?.variables.y.data).toHaveLength(70);
+  expect(spectrum?.variables.y.label).toBe('Intensity');
+  expect(spectrum?.variables.y.units).toBe('%');
+  expect(spectrum?.variables.y.isDependent).toBe(true);
 });
 
 test('additional variables are present (volume, number, etc.)', async () => {
-  const measurements = await loadMeasurements();
-  const measurement = measurements[0];
+  const analysis = await loadAnalysis();
+  const spectrum = analysis.spectra[0];
 
-  expect(measurement).toBeDefined();
+  expect(spectrum).toBeDefined();
 
   // v = volume distribution
-  expect(measurement?.variables.v).toBeDefined();
-  expect(measurement?.variables.v?.label).toBe('Volume');
-  expect(measurement?.variables.v?.units).toBe('%');
-  expect(measurement?.variables.v?.data).toHaveLength(70);
+  expect(spectrum?.variables.v).toBeDefined();
+  expect(spectrum?.variables.v?.label).toBe('Volume');
+  expect(spectrum?.variables.v?.units).toBe('%');
+  expect(spectrum?.variables.v?.data).toHaveLength(70);
 
   // n = number distribution
-  expect(measurement?.variables.n).toBeDefined();
-  expect(measurement?.variables.n?.label).toBe('Number');
-  expect(measurement?.variables.n?.data).toHaveLength(70);
+  expect(spectrum?.variables.n).toBeDefined();
+  expect(spectrum?.variables.n?.label).toBe('Number');
+  expect(spectrum?.variables.n?.data).toHaveLength(70);
 
   // w = molecular weights
-  expect(measurement?.variables.w).toBeDefined();
-  expect(measurement?.variables.w?.label).toBe('Molecular weight');
-  expect(measurement?.variables.w?.data).toHaveLength(70);
+  expect(spectrum?.variables.w).toBeDefined();
+  expect(spectrum?.variables.w?.label).toBe('Molecular weight');
+  expect(spectrum?.variables.w?.data).toHaveLength(70);
 
   // d = diffusion coefficients
-  expect(measurement?.variables.d).toBeDefined();
-  expect(measurement?.variables.d?.label).toBe('Diffusion coefficient');
-  expect(measurement?.variables.d?.data).toHaveLength(70);
+  expect(spectrum?.variables.d).toBeDefined();
+  expect(spectrum?.variables.d?.label).toBe('Diffusion coefficient');
+  expect(spectrum?.variables.d?.data).toHaveLength(70);
 });
 
 test('title is extracted from sample name', async () => {
-  const measurements = await loadMeasurements();
+  const analysis = await loadAnalysis();
 
-  expect(measurements[0]?.title).toBe('TEST XX230.A');
+  expect(analysis.spectra[0]?.title).toBe('TEST XX230.A');
 });
 
 test('record GUID is used as id', async () => {
-  const measurements = await loadMeasurements();
+  const analysis = await loadAnalysis();
 
-  expect(measurements[0]?.id).toBe('f5e0a56f-3426-427a-91ca-731e963cc86b');
+  expect(analysis.spectra[0]?.id).toBe('f5e0a56f-3426-427a-91ca-731e963cc86b');
 });
 
 test('meta contains measurement metadata', async () => {
-  const measurements = await loadMeasurements();
-  const meta = measurements[0]?.meta;
+  const analysis = await loadAnalysis();
+  const meta = analysis.spectra[0]?.meta;
 
   expect(meta?.operatorName).toBe('gbf-network');
   expect(meta?.measurementStartDateTime).toBe('2026-02-25T08:33:17.2828726Z');
@@ -104,16 +104,16 @@ test('meta contains measurement metadata', async () => {
 });
 
 test('meta contains cumulants results', async () => {
-  const measurements = await loadMeasurements();
-  const meta = measurements[0]?.meta;
+  const analysis = await loadAnalysis();
+  const meta = analysis.spectra[0]?.meta;
 
   expect(meta?.zAverage).toBeCloseTo(489.144, 2);
   expect(meta?.polydispersityIndex).toBeCloseTo(0.2645, 3);
 });
 
 test('meta contains dispersant and material info', async () => {
-  const measurements = await loadMeasurements();
-  const meta = measurements[0]?.meta;
+  const analysis = await loadAnalysis();
+  const meta = analysis.spectra[0]?.meta;
 
   expect(meta?.dispersantViscosity).toBeCloseTo(2.32, 1);
   expect(meta?.dispersantRI).toBeCloseTo(1.39, 1);
@@ -122,8 +122,8 @@ test('meta contains dispersant and material info', async () => {
 });
 
 test('settings contain instrument info', async () => {
-  const measurements = await loadMeasurements();
-  const settings = measurements[0]?.settings;
+  const analysis = await loadAnalysis();
+  const settings = analysis.spectra[0]?.settings;
 
   expect(settings?.instrument).toStrictEqual({
     manufacturer: 'Malvern Panalytical',
@@ -137,8 +137,8 @@ test('settings contain instrument info', async () => {
 });
 
 test('settings contain actual instrument parameters', async () => {
-  const measurements = await loadMeasurements();
-  const settings = measurements[0]?.settings;
+  const analysis = await loadAnalysis();
+  const settings = analysis.spectra[0]?.settings;
 
   expect(settings?.detectorAngle).toBe(173);
   expect(settings?.numberOfRuns).toBe(35);

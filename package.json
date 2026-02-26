@@ -20,7 +20,7 @@
     "src"
   ],
   "scripts": {
-    "build": "npm run tsc && cheminfo-build --entry lib/index.js --root ZmesParser && cp node_modules/@sqlite.org/sqlite-wasm/dist/sqlite3.wasm dist/",
+    "build": "npm run tsc && cheminfo-build --entry lib/index.js --root ZmesParser",
     "check-types": "tsc --noEmit",
     "clean": "rimraf coverage lib",
     "eslint": "eslint .",
@@ -39,7 +39,6 @@
     "zmes-parser": "^1.0.0"
   },
   "devDependencies": {
-    "@sqlite.org/sqlite-wasm": "^3.51.2-build6",
     "@types/node": "^25.3.0",
     "@vitest/coverage-v8": "^4.0.18",
     "@zakodium/tsconfig": "^1.0.2",

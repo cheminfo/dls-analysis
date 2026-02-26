@@ -21,7 +21,6 @@
   ],
   "scripts": {
     "build": "npm run tsc && cheminfo-build --entry lib/index.js --root ZmesParser && cp node_modules/@sqlite.org/sqlite-wasm/dist/sqlite3.wasm dist/",
-    "build2": "npm run tsc && cheminfo-build --entry lib/index.js --root ZmesParser && cp node_modules/@sqlite.org/sqlite-wasm/dist/sqlite3.wasm dist/",
     "check-types": "tsc --noEmit",
     "clean": "rimraf coverage lib",
     "eslint": "eslint .",

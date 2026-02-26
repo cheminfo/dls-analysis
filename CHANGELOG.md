@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/cheminfo/dls-analysis/compare/v1.1.1...v1.1.2) (2026-02-26)
+
+
+### Bug Fixes
+
+* embed sqlite3 ([eb3f158](https://github.com/cheminfo/dls-analysis/commit/eb3f158ee5d1c12639883caa7037f6bdba651291))
+* fromZmes creates analysis ([855345b](https://github.com/cheminfo/dls-analysis/commit/855345b6e3215b270a7f7cd3e5df2be776bd0055))
+
 ## [1.1.1](https://github.com/cheminfo/dls-analysis/compare/v1.1.0...v1.1.1) (2026-02-26)
 
 

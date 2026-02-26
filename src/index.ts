@@ -1,10 +1,10 @@
 export {
   AnalysesManager,
   Analysis,
-  autoPeakPicking,
-  fromText,
-  peakPicking,
+  JSGraph,
+  fromJcamp,
   toJcamp,
+  toJcamps,
   toMatrix,
   toText,
 } from 'common-spectrum';

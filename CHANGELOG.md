@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/cheminfo/dls-analysis/compare/v1.1.2...v1.2.0) (2026-03-06)
+
+
+### Features
+
+* add fromZetasizer ([00c9c4e](https://github.com/cheminfo/dls-analysis/commit/00c9c4e161d7d90cb835e2fa4e39f92f9cf3664b))
+
 ## [1.1.2](https://github.com/cheminfo/dls-analysis/compare/v1.1.1...v1.1.2) (2026-02-26)
 
 

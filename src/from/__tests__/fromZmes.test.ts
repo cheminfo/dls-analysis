@@ -22,7 +22,7 @@ test('one record produces one spectrum', async () => {
   const analysis = await loadAnalysis();
 
   expect(analysis.spectra).toHaveLength(2);
-  expect(analysis.spectra[0]?.dataType).toBe('Size measurement');
+  expect(analysis.spectra[0]?.dataType).toBe('DLS measurement');
 });
 
 test('x variable contains Sizes data', async () => {

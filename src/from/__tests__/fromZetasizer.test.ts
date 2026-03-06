@@ -12,7 +12,7 @@ test('file produces 3 spectra', () => {
   const analysis = fromZetasizer(text);
 
   expect(analysis.spectra).toHaveLength(3);
-  expect(analysis.spectra[0]?.dataType).toBe('Size measurement');
+  expect(analysis.spectra[0]?.dataType).toBe('DLS measurement');
 });
 
 test('x variable contains Sizes data', () => {

@@ -125,7 +125,7 @@ export async function fromZmes(
     analysis.pushSpectrum(variables, {
       id: record.guid,
       title: extractTitle(parameters),
-      dataType: 'Size measurement',
+      dataType: 'DLS measurement',
       meta: extractMeta(parameters),
     });
 

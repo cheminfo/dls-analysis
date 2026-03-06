@@ -81,7 +81,7 @@ export function fromZetasizer(
 
     analysis.pushSpectrum(variables, {
       title: extractTitle(record),
-      dataType: 'Size measurement',
+      dataType: 'DLS measurement',
       meta: extractMeta(record),
     });
 

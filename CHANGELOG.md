@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/cheminfo/dls-analysis/compare/v1.2.0...v1.2.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* dataType is now DLS measurement ([f84799f](https://github.com/cheminfo/dls-analysis/commit/f84799f289d327f7179ebb02ee5ffbabe5fe2c1b))
+
 ## [1.2.0](https://github.com/cheminfo/dls-analysis/compare/v1.1.2...v1.2.0) (2026-03-06)
 
 

@@ -36,6 +36,7 @@
   "dependencies": {
     "cheminfo-types": "^1.10.0",
     "common-spectrum": "^3.1.0",
+    "parse-zetasizer": "^1.0.0",
     "zmes-parser": "^1.0.0"
   },
   "devDependencies": {

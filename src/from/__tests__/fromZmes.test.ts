@@ -21,6 +21,8 @@ async function loadAnalysis(): Promise<Analysis> {
 test('one record produces one spectrum', async () => {
   const analysis = await loadAnalysis();
 
+  console.log(analysis.spectra[0]);
+
   expect(analysis.spectra).toHaveLength(2);
   expect(analysis.spectra[0]?.dataType).toBe('Size measurement');
 });

@@ -1,13 +1,16 @@
 import type {
+  DLSDistribution,
+  DLSDistributionStats,
+  DLSMeta,
   MeasurementVariable,
   MeasurementXY,
   MeasurementXYVariables,
 } from 'cheminfo-types';
 import { Analysis } from 'common-spectrum';
-import type { ZmesFile } from 'zmes-parser';
-import { parse } from 'zmes-parser';
+import type { ZmesParameter } from 'zmes-parser';
+import { findParameter, findParameterDeep, parse } from 'zmes-parser';
 
-type ZmesParameter = ZmesFile['records'][number]['parameters'];
+import type { DLSCheminfo } from '../types.ts';
 
 interface VariableDescriptor {
   /** Parameter name to find in the tree */
@@ -81,6 +84,24 @@ const VARIABLE_DESCRIPTORS: VariableDescriptor[] = [
   },
 ];
 
+const PEAK_CONTAINERS: Array<{
+  parameterName: string;
+  key: keyof DLSDistribution;
+}> = [
+  {
+    parameterName: 'Particle Size Intensity Distribution Peaks ordered by area',
+    key: 'intensity',
+  },
+  {
+    parameterName: 'Particle Size Volume Distribution Peaks ordered by area',
+    key: 'volume',
+  },
+  {
+    parameterName: 'Particle Size Number Distribution Peaks ordered by area',
+    key: 'number',
+  },
+];
+
 interface FromZmesOptions {
   /** Unique identifier for the analysis. */
   id?: string;
@@ -122,11 +143,17 @@ export async function fromZmes(
       continue;
     }
 
+    const meta = extractMeta(parameters);
+    const cheminfo = extractCheminfo(parameters);
+    if (cheminfo) {
+      meta.cheminfo = cheminfo;
+    }
+
     analysis.pushSpectrum(variables, {
       id: record.guid,
       title: extractTitle(parameters),
       dataType: 'DLS measurement',
-      meta: extractMeta(parameters),
+      meta,
     });
 
     const spectrum = analysis.spectra.at(-1);
@@ -136,43 +163,6 @@ export async function fromZmes(
   }
 
   return analysis;
-}
-
-/**
- * Find a parameter by name in a flat list of children (direct children only).
- * @param children - List of parameters to search
- * @param name - Name to search for
- * @returns The matching parameter, or undefined if not found
- */
-function findParameter(
-  children: ZmesParameter[],
-  name: string,
-): ZmesParameter | undefined {
-  return children.find((child) => child.name === name);
-}
-
-/**
- * Recursively search for a parameter by name in the parameter tree.
- * @param parameter - Root parameter node to search from
- * @param name - Name to search for
- * @returns The matching parameter, or undefined if not found
- */
-function findParameterDeep(
-  parameter: ZmesParameter,
-  name: string,
-): ZmesParameter | undefined {
-  if (parameter.name === name) {
-    return parameter;
-  }
-  if (parameter.children) {
-    for (const child of parameter.children) {
-      const found = findParameterDeep(child, name);
-      if (found) {
-        return found;
-      }
-    }
-  }
-  return undefined;
 }
 
 /**
@@ -382,4 +372,108 @@ function extractSettings(parameters: ZmesParameter): MeasurementXY['settings'] {
   }
 
   return settings as MeasurementXY['settings'];
+}
+
+/**
+ * Build the standardized cheminfo metadata for a DLS measurement.
+ *
+ * Extracts cumulants results (Z-Average, PDI, derived count rate) and
+ * peak summaries from the parameter tree into the `DLSCheminfo` structure.
+ * @param parameters - Root parameter node
+ * @returns DLSCheminfo object, or undefined if no relevant data is found
+ */
+function extractCheminfo(parameters: ZmesParameter): DLSCheminfo | undefined {
+  const dlsMeta: DLSMeta = {};
+
+  const zAverage = findParameterDeep(parameters, 'Z-Average (nm)');
+  if (typeof zAverage?.value === 'number') {
+    dlsMeta.zAverage = { value: zAverage.value, units: 'nm' };
+  }
+
+  const pdi = findParameterDeep(parameters, 'Polydispersity Index (PI)');
+  if (typeof pdi?.value === 'number') {
+    dlsMeta.polydispersityIndex = pdi.value;
+  }
+
+  const countRate = findParameterDeep(
+    parameters,
+    'Derived Mean Count Rate (kcps)',
+  );
+  if (typeof countRate?.value === 'number') {
+    dlsMeta.derivedMeanCountRate = { value: countRate.value, units: 'kcps' };
+  }
+
+  const distributions = extractDistributions(parameters);
+  if (distributions.length > 0) {
+    dlsMeta.distributions = distributions;
+  }
+
+  if (Object.keys(dlsMeta).length === 0) {
+    return undefined;
+  }
+
+  return { meta: dlsMeta };
+}
+
+/**
+ * Extract peak summary data from the parameter tree.
+ *
+ * The Zmes format stores peaks per distribution type in separate containers
+ * (e.g., "Particle Size Intensity Distribution Peaks ordered by area").
+ * Each container holds "Size Peak" children with Mean, Area, and
+ * Standard Deviation. Peaks are merged by index across distribution types
+ * into a single DLSDistribution per detected population.
+ * @param parameters - Root parameter node
+ * @returns Array of distributions, one per detected particle population
+ */
+function extractDistributions(parameters: ZmesParameter): DLSDistribution[] {
+  const distributions: DLSDistribution[] = [];
+
+  for (const container of PEAK_CONTAINERS) {
+    const containerParameter = findParameterDeep(
+      parameters,
+      container.parameterName,
+    );
+    if (!containerParameter?.children) continue;
+
+    let peakIndex = 0;
+    for (const peakNode of containerParameter.children) {
+      if (peakNode.name !== 'Size Peak' || !peakNode.children) continue;
+
+      const stats = extractPeakStats(peakNode.children);
+
+      let distribution = distributions[peakIndex];
+      if (!distribution) {
+        distribution = {};
+        distributions[peakIndex] = distribution;
+      }
+      distribution[container.key] = stats;
+      peakIndex++;
+    }
+  }
+
+  return distributions;
+}
+
+/**
+ * Extract distribution stats from a single peak node's children.
+ * @param children - Children of a "Size Peak" parameter node
+ * @returns DLSDistributionStats with mean, area, and standardDeviation
+ */
+function extractPeakStats(children: ZmesParameter[]): DLSDistributionStats {
+  const stats: DLSDistributionStats = {};
+
+  for (const property of children) {
+    if (typeof property.value !== 'number') continue;
+
+    if (property.name === 'Mean') {
+      stats.mean = { value: property.value, units: 'nm' };
+    } else if (property.name === 'Area') {
+      stats.area = { value: property.value, units: '%' };
+    } else if (property.name === 'Standard Deviation') {
+      stats.standardDeviation = { value: property.value, units: 'nm' };
+    }
+  }
+
+  return stats;
 }

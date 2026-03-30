@@ -5,18 +5,34 @@ import { expect, test } from 'vitest';
 
 import { fromZetasizer } from '../../index.ts';
 
-const testFilePath = join(import.meta.dirname, 'data/zetasizer.txt');
-const text = readFileSync(testFilePath, 'latin1');
+const mxdData = readFileSync(
+  join(import.meta.dirname, 'data/mxd_zetasizer.txt'),
+);
+const chcData = readFileSync(
+  join(import.meta.dirname, 'data/chc_particleSize.txt'),
+);
+
+test('mxd file snapshot', () => {
+  const analysis = fromZetasizer(mxdData);
+
+  expect(analysis.spectra).toMatchSnapshot();
+});
+
+test('chc file snapshot', () => {
+  const analysis = fromZetasizer(chcData);
+
+  expect(analysis.spectra).toMatchSnapshot();
+});
 
 test('file produces 3 spectra', () => {
-  const analysis = fromZetasizer(text);
+  const analysis = fromZetasizer(mxdData);
 
   expect(analysis.spectra).toHaveLength(3);
   expect(analysis.spectra[0]?.dataType).toBe('DLS measurement');
 });
 
 test('x variable contains Sizes data', () => {
-  const analysis = fromZetasizer(text);
+  const analysis = fromZetasizer(mxdData);
   const spectrum = analysis.spectra[0];
 
   expect(spectrum).toBeDefined();
@@ -30,7 +46,7 @@ test('x variable contains Sizes data', () => {
 });
 
 test('y variable contains intensity distribution', () => {
-  const analysis = fromZetasizer(text);
+  const analysis = fromZetasizer(mxdData);
   const spectrum = analysis.spectra[0];
 
   expect(spectrum).toBeDefined();
@@ -42,7 +58,7 @@ test('y variable contains intensity distribution', () => {
 });
 
 test('volume and number variables are present', () => {
-  const analysis = fromZetasizer(text);
+  const analysis = fromZetasizer(mxdData);
   const spectrum = analysis.spectra[0];
 
   expect(spectrum).toBeDefined();
@@ -58,14 +74,14 @@ test('volume and number variables are present', () => {
 });
 
 test('title is extracted from sample name', () => {
-  const analysis = fromZetasizer(text);
+  const analysis = fromZetasizer(mxdData);
 
   expect(analysis.spectra[0]?.title).toBe('20260916_SiNP_7 1');
   expect(analysis.spectra[1]?.title).toBe('20260916_SiNP_7 2');
 });
 
 test('meta contains measurement metadata', () => {
-  const analysis = fromZetasizer(text);
+  const analysis = fromZetasizer(mxdData);
   const meta = analysis.spectra[0]?.meta;
 
   expect(meta?.['Measurement Date and Time']).toBe(
@@ -78,7 +94,7 @@ test('meta contains measurement metadata', () => {
 });
 
 test('settings contain instrument info', () => {
-  const analysis = fromZetasizer(text);
+  const analysis = fromZetasizer(mxdData);
   const settings = analysis.spectra[0]?.settings;
 
   expect(settings?.instrument).toStrictEqual({
@@ -92,8 +108,44 @@ test('settings contain instrument info', () => {
   });
 });
 
+test('meta.cheminfo is absent when peak data is not exported', () => {
+  const analysis = fromZetasizer(mxdData);
+  const meta = analysis.spectra[0]?.meta;
+
+  expect(meta?.cheminfo).toBeUndefined();
+});
+
+test('chc file: meta.cheminfo contains cumulants and peak data', () => {
+  const analysis = fromZetasizer(chcData);
+  const cheminfo = analysis.spectra[0]?.meta?.cheminfo;
+
+  expect(cheminfo).toBeDefined();
+  expect(cheminfo?.meta?.zAverage).toStrictEqual({ value: 108, units: 'nm' });
+  expect(cheminfo?.meta?.polydispersityIndex).toBe(0.112);
+  expect(cheminfo?.meta?.derivedMeanCountRate).toStrictEqual({
+    value: 2683,
+    units: 'kcps',
+  });
+  expect(cheminfo?.meta?.intercept).toBe(0.941);
+
+  const distributions = cheminfo?.meta?.distributions;
+
+  expect(distributions).toHaveLength(1);
+
+  const population = distributions[0];
+
+  expect(population?.intensity?.mean).toStrictEqual({
+    value: 116.1,
+    units: 'nm',
+  });
+  expect(population?.intensity?.standardDeviation).toStrictEqual({
+    value: 32.94,
+    units: 'nm',
+  });
+});
+
 test('settings contain measurement parameters', () => {
-  const analysis = fromZetasizer(text);
+  const analysis = fromZetasizer(mxdData);
   const meta = analysis.spectra[0]?.meta;
 
   expect(meta?.['Temperature (°C)']).toBe(25);
@@ -102,3 +154,4 @@ test('settings contain measurement parameters', () => {
   expect(meta?.['Measurement Position (mm)']).toBe(3);
   expect(meta?.Attenuator).toBe(7);
 });
+

@@ -11,3 +11,9 @@ export {
 
 export { fromZetasizer } from './from/fromZetasizer.ts';
 export { fromZmes } from './from/fromZmes.ts';
+export type {
+  DLSDistribution,
+  DLSDistributionStats,
+  DLSMeta,
+} from 'cheminfo-types';
+export type { DLSCheminfo } from './types.ts';

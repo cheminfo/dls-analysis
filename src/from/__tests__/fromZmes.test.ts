@@ -18,6 +18,12 @@ async function loadAnalysis(): Promise<Analysis> {
   return fromZmes(arrayBuffer);
 }
 
+test('snapshot', async () => {
+  const analysis = await loadAnalysis();
+
+  expect(analysis.spectra).toMatchSnapshot();
+});
+
 test('one record produces one spectrum', async () => {
   const analysis = await loadAnalysis();
 
@@ -134,6 +140,53 @@ test('settings contain instrument info', async () => {
       version: '4.1.0.82',
     },
   });
+});
+
+test('meta.cheminfo contains DLS analysis results', async () => {
+  const analysis = await loadAnalysis();
+  const cheminfo = analysis.spectra[0]?.meta?.cheminfo;
+
+  expect(cheminfo).toBeDefined();
+  expect(cheminfo?.meta?.zAverage).toStrictEqual({
+    value: expect.closeTo(489.14, 1),
+    units: 'nm',
+  });
+  expect(cheminfo?.meta?.polydispersityIndex).toBeCloseTo(0.2645, 3);
+  expect(cheminfo?.meta?.derivedMeanCountRate).toStrictEqual({
+    value: expect.closeTo(13500.15, 0),
+    units: 'kcps',
+  });
+
+  const distributions = cheminfo?.meta?.distributions;
+
+  expect(distributions).toHaveLength(1);
+
+  const population = distributions[0];
+
+  expect(population?.intensity?.mean).toStrictEqual({
+    value: expect.closeTo(492.17, 1),
+    units: 'nm',
+  });
+  expect(population?.intensity?.area).toStrictEqual({
+    value: 100,
+    units: '%',
+  });
+  expect(population?.intensity?.standardDeviation).toStrictEqual({
+    value: expect.closeTo(137.32, 1),
+    units: 'nm',
+  });
+
+  expect(population?.volume?.mean).toStrictEqual({
+    value: expect.closeTo(527.82, 1),
+    units: 'nm',
+  });
+  expect(population?.volume?.area).toStrictEqual({ value: 100, units: '%' });
+
+  expect(population?.number?.mean).toStrictEqual({
+    value: expect.closeTo(413.77, 1),
+    units: 'nm',
+  });
+  expect(population?.number?.area).toStrictEqual({ value: 100, units: '%' });
 });
 
 test('settings contain actual instrument parameters', async () => {

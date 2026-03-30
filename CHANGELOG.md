@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/cheminfo/dls-analysis/compare/v1.2.1...v1.3.0) (2026-03-30)
+
+
+### Features
+
+* add cheminfo metadata with DLS distributions and peak summaries ([bf5b7cb](https://github.com/cheminfo/dls-analysis/commit/bf5b7cb5dca86b01c618dbdd639806ac181b7909))
+* extract distributions from meta, add average and intercept ([5b3e6f5](https://github.com/cheminfo/dls-analysis/commit/5b3e6f59bb2c15fea567d440d9d098f5f362e1ec))
+
+
+### Bug Fixes
+
+* use stable sequential ids for zetasizer spectra ([92da699](https://github.com/cheminfo/dls-analysis/commit/92da699b3153cc7b60faf116bc10477106e4e9bf))
+
 ## [1.2.1](https://github.com/cheminfo/dls-analysis/compare/v1.2.0...v1.2.1) (2026-03-06)
 
 

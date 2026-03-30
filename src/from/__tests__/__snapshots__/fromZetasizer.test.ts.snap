@@ -4,7 +4,7 @@ exports[`chc file snapshot 1`] = `
 [
   {
     "dataType": "DLS measurement",
-    "id": "xo9t44xiu4n",
+    "id": "eyp56y7rahe",
     "meta": {
       "%Pd Peak 1 (Percent)": 28.4,
       "%Pd Peak 2 (Percent)": 0,
@@ -53,6 +53,26 @@ exports[`chc file snapshot 1`] = `
       "Z-Average (d.nm)": 108,
       "cheminfo": {
         "meta": {
+          "average": {
+            "intensity": {
+              "mean": {
+                "units": "nm",
+                "value": 116.1,
+              },
+            },
+            "number": {
+              "mean": {
+                "units": "nm",
+                "value": 78.38,
+              },
+            },
+            "volume": {
+              "mean": {
+                "units": "nm",
+                "value": 99.31,
+              },
+            },
+          },
           "derivedMeanCountRate": {
             "units": "kcps",
             "value": 2683,
@@ -67,6 +87,18 @@ exports[`chc file snapshot 1`] = `
                 "standardDeviation": {
                   "units": "nm",
                   "value": 32.94,
+                },
+              },
+              "number": {
+                "mean": {
+                  "units": "nm",
+                  "value": 78.38,
+                },
+              },
+              "volume": {
+                "mean": {
+                  "units": "nm",
+                  "value": 99.31,
                 },
               },
             },
@@ -422,7 +454,7 @@ exports[`chc file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "uuljkho6vc7",
+    "id": "9mmdlory6fh",
     "meta": {
       "%Pd Peak 1 (Percent)": 30.9,
       "%Pd Peak 2 (Percent)": 0,
@@ -471,6 +503,26 @@ exports[`chc file snapshot 1`] = `
       "Z-Average (d.nm)": 108.1,
       "cheminfo": {
         "meta": {
+          "average": {
+            "intensity": {
+              "mean": {
+                "units": "nm",
+                "value": 119.4,
+              },
+            },
+            "number": {
+              "mean": {
+                "units": "nm",
+                "value": 67.67,
+              },
+            },
+            "volume": {
+              "mean": {
+                "units": "nm",
+                "value": 97.57,
+              },
+            },
+          },
           "derivedMeanCountRate": {
             "units": "kcps",
             "value": 2674,
@@ -485,6 +537,18 @@ exports[`chc file snapshot 1`] = `
                 "standardDeviation": {
                   "units": "nm",
                   "value": 36.91,
+                },
+              },
+              "number": {
+                "mean": {
+                  "units": "nm",
+                  "value": 67.67,
+                },
+              },
+              "volume": {
+                "mean": {
+                  "units": "nm",
+                  "value": 97.57,
                 },
               },
             },
@@ -840,7 +904,7 @@ exports[`chc file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "05to5kszup7",
+    "id": "ajp0ou5ena5",
     "meta": {
       "%Pd Peak 1 (Percent)": 34.1,
       "%Pd Peak 2 (Percent)": 0,
@@ -889,6 +953,26 @@ exports[`chc file snapshot 1`] = `
       "Z-Average (d.nm)": 108.2,
       "cheminfo": {
         "meta": {
+          "average": {
+            "intensity": {
+              "mean": {
+                "units": "nm",
+                "value": 119.8,
+              },
+            },
+            "number": {
+              "mean": {
+                "units": "nm",
+                "value": 77.59,
+              },
+            },
+            "volume": {
+              "mean": {
+                "units": "nm",
+                "value": 99.59,
+              },
+            },
+          },
           "derivedMeanCountRate": {
             "units": "kcps",
             "value": 2659.4,
@@ -903,6 +987,18 @@ exports[`chc file snapshot 1`] = `
                 "standardDeviation": {
                   "units": "nm",
                   "value": 40.88,
+                },
+              },
+              "number": {
+                "mean": {
+                  "units": "nm",
+                  "value": 77.59,
+                },
+              },
+              "volume": {
+                "mean": {
+                  "units": "nm",
+                  "value": 99.59,
                 },
               },
             },
@@ -1258,7 +1354,7 @@ exports[`chc file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "0ql1mt9l61b9",
+    "id": "5b7k4p0frr6",
     "meta": {
       "%Pd Peak 1 (Percent)": 26.7,
       "%Pd Peak 2 (Percent)": 0,
@@ -1307,6 +1403,26 @@ exports[`chc file snapshot 1`] = `
       "Z-Average (d.nm)": 108.1,
       "cheminfo": {
         "meta": {
+          "average": {
+            "intensity": {
+              "mean": {
+                "units": "nm",
+                "value": 118.4,
+              },
+            },
+            "number": {
+              "mean": {
+                "units": "nm",
+                "value": 83.53,
+              },
+            },
+            "volume": {
+              "mean": {
+                "units": "nm",
+                "value": 103.6,
+              },
+            },
+          },
           "derivedMeanCountRate": {
             "units": "kcps",
             "value": 2617.8,
@@ -1321,6 +1437,18 @@ exports[`chc file snapshot 1`] = `
                 "standardDeviation": {
                   "units": "nm",
                   "value": 31.66,
+                },
+              },
+              "number": {
+                "mean": {
+                  "units": "nm",
+                  "value": 83.53,
+                },
+              },
+              "volume": {
+                "mean": {
+                  "units": "nm",
+                  "value": 103.6,
                 },
               },
             },
@@ -1681,7 +1809,7 @@ exports[`mxd file snapshot 1`] = `
 [
   {
     "dataType": "DLS measurement",
-    "id": "r1nbhrazzcb",
+    "id": "tqxbzgr1lza",
     "meta": {
       "Actual Transmission Factor": 100,
       "Analysis Date": "Wednesday, 25 February 2026 16:02:06",
@@ -2048,7 +2176,7 @@ exports[`mxd file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "ht1g3j132ri",
+    "id": "rq23flnhwvj",
     "meta": {
       "Actual Transmission Factor": 100,
       "Analysis Date": "Wednesday, 25 February 2026 16:03:48",
@@ -2415,7 +2543,7 @@ exports[`mxd file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "pvyeo6dmfoj",
+    "id": "kwjwj28blaj",
     "meta": {
       "Actual Transmission Factor": 100,
       "Analysis Date": "Wednesday, 25 February 2026 16:05:30",

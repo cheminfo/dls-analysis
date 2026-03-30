@@ -8,6 +8,26 @@ exports[`snapshot 1`] = `
     "meta": {
       "cheminfo": {
         "meta": {
+          "average": {
+            "intensity": {
+              "mean": {
+                "units": "nm",
+                "value": 492.17331702095305,
+              },
+            },
+            "number": {
+              "mean": {
+                "units": "nm",
+                "value": 413.77124201019484,
+              },
+            },
+            "volume": {
+              "mean": {
+                "units": "nm",
+                "value": 527.8231806814123,
+              },
+            },
+          },
           "derivedMeanCountRate": {
             "units": "kcps",
             "value": 13500.15192206252,
@@ -58,6 +78,7 @@ exports[`snapshot 1`] = `
               },
             },
           ],
+          "intercept": 0.9310968508788467,
           "polydispersityIndex": 0.264454378275493,
           "zAverage": {
             "units": "nm",
@@ -759,6 +780,26 @@ exports[`snapshot 1`] = `
     "meta": {
       "cheminfo": {
         "meta": {
+          "average": {
+            "intensity": {
+              "mean": {
+                "units": "nm",
+                "value": 331.29836780738077,
+              },
+            },
+            "number": {
+              "mean": {
+                "units": "nm",
+                "value": 320.1148989085482,
+              },
+            },
+            "volume": {
+              "mean": {
+                "units": "nm",
+                "value": 338.44909731419847,
+              },
+            },
+          },
           "derivedMeanCountRate": {
             "units": "kcps",
             "value": 13385.978998185345,
@@ -809,6 +850,7 @@ exports[`snapshot 1`] = `
               },
             },
           ],
+          "intercept": 0.9576356176458312,
           "polydispersityIndex": 0.43089387309090005,
           "zAverage": {
             "units": "nm",

@@ -2,6 +2,7 @@ import type {
   DLSDistribution,
   DLSDistributionStats,
   DLSMeta,
+  DLSSizeDistribution,
   MeasurementVariable,
   MeasurementXY,
   MeasurementXYVariables,
@@ -403,9 +404,18 @@ function extractCheminfo(parameters: ZmesParameter): DLSCheminfo | undefined {
     dlsMeta.derivedMeanCountRate = { value: countRate.value, units: 'kcps' };
   }
 
+  const intercept = findParameterDeep(parameters, 'Intercept');
+  if (typeof intercept?.value === 'number') {
+    dlsMeta.intercept = intercept.value;
+  }
+
   const distributions = extractDistributions(parameters);
   if (distributions.length > 0) {
     dlsMeta.distributions = distributions;
+    const average = computeAverage(distributions);
+    if (average) {
+      dlsMeta.average = average;
+    }
   }
 
   if (Object.keys(dlsMeta).length === 0) {
@@ -453,6 +463,54 @@ function extractDistributions(parameters: ZmesParameter): DLSDistribution[] {
   }
 
   return distributions;
+}
+
+/**
+ * Compute overall weighted-average distribution stats from per-peak data.
+ *
+ * For each distribution type (intensity, volume, number), the overall mean
+ * is computed as the area-weighted average of peak means.
+ * @param distributions - Per-peak distribution data
+ * @returns Overall size distribution averages, or undefined if none computed
+ */
+function computeAverage(
+  distributions: DLSDistribution[],
+): DLSSizeDistribution | undefined {
+  const keys: Array<keyof DLSSizeDistribution> = [
+    'intensity',
+    'volume',
+    'number',
+  ];
+  const average: DLSSizeDistribution = {};
+
+  for (const key of keys) {
+    let weightedSum = 0;
+    let totalArea = 0;
+
+    for (const distribution of distributions) {
+      const stats = distribution[key];
+      if (
+        stats?.mean?.value === undefined ||
+        stats?.area?.value === undefined
+      ) {
+        continue;
+      }
+      weightedSum += stats.mean.value * stats.area.value;
+      totalArea += stats.area.value;
+    }
+
+    if (totalArea > 0) {
+      average[key] = {
+        mean: { value: weightedSum / totalArea, units: 'nm' },
+      };
+    }
+  }
+
+  if (Object.keys(average).length === 0) {
+    return undefined;
+  }
+
+  return average;
 }
 
 /**

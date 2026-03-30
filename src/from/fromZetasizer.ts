@@ -8,7 +8,7 @@ import type {
 } from 'cheminfo-types';
 import { Analysis } from 'common-spectrum';
 import type { ZetasizerRecord } from 'parse-zetasizer';
-import { fromText } from 'parse-zetasizer';
+import { fromText, getArray } from 'parse-zetasizer';
 
 import type { DLSCheminfo } from '../types.ts';
 
@@ -115,8 +115,8 @@ export function fromZetasizer(
 function buildVariables(
   record: ZetasizerRecord,
 ): MeasurementXYVariables<Float64Array> | undefined {
-  const sizes = record.arrays.Sizes;
-  const intensities = record.arrays.Intensities;
+  const sizes = getArray(record, 'Sizes');
+  const intensities = getArray(record, 'Intensities');
 
   if (!sizes?.data.length || !intensities?.data.length) {
     return undefined;
@@ -142,7 +142,7 @@ function buildVariables(
   for (const mapping of VARIABLE_MAPPING) {
     if (mapping.symbol === 'x' || mapping.symbol === 'y') continue;
 
-    const array = record.arrays[mapping.arrayName];
+    const array = getArray(record, mapping.arrayName);
     if (array?.data.length) {
       const letter =
         mapping.symbol as keyof MeasurementXYVariables<Float64Array>;
@@ -172,8 +172,7 @@ function extractTitle(record: ZetasizerRecord): string {
 /**
  * Extract metadata from a parsed record.
  *
- * All scalar metadata from the record is included. Known numeric fields
- * are mapped to standard keys for consistency with fromZmes output.
+ * All scalar metadata from the record is included except Sample Name (used as title).
  * @param record - Parsed Zetasizer record
  * @returns Record of metadata key-value pairs
  */
@@ -189,33 +188,10 @@ function extractMeta(record: ZetasizerRecord): Record<string, unknown> {
 }
 
 /**
- * Patterns matching Zetasizer peak summary columns.
+ * Build standardized cheminfo metadata from a Zetasizer record.
  *
- * Format A (some exports): "Pk 1 Mean Int (d.nm)", "Pk 2 Area Vol (%)"
- * Format B (common): "Intensity peak 1 (d.nm)", "Intensity Width Peak 1 (d.nm)"
- */
-const PEAK_PATTERNS: Array<{
-  pattern: RegExp;
-  property: 'mean' | 'standardDeviation';
-  key: keyof DLSDistribution;
-}> = [
-  {
-    pattern: /^Intensity\s+peak\s+(?<n>\d+)/i,
-    property: 'mean',
-    key: 'intensity',
-  },
-  {
-    pattern: /^Intensity\s+width\s+peak\s+(?<n>\d+)/i,
-    property: 'standardDeviation',
-    key: 'intensity',
-  },
-];
-
-/**
- * Build standardized cheminfo metadata from Zetasizer meta fields.
- *
- * Extracts cumulants results (Z-Average, PdI, intercept, derived count rate)
- * and intensity peak summaries from the record's meta fields.
+ * Extracts cumulants results (Z-Average, PdI, intercept, derived count rate),
+ * overall distribution means, and per-peak distribution summaries.
  * @param record - Parsed Zetasizer record
  * @returns DLSCheminfo object, or undefined if no relevant data is found
  */
@@ -242,6 +218,11 @@ function extractCheminfo(record: ZetasizerRecord): DLSCheminfo | undefined {
   const intercept = getNumber(meta, 'Intercept');
   if (intercept !== undefined) {
     dlsMeta.intercept = intercept;
+  }
+
+  const average = extractAverage(record);
+  if (average) {
+    dlsMeta.average = average;
   }
 
   const distributions = extractDistributions(record);
@@ -271,10 +252,65 @@ function getNumber(
 }
 
 /**
- * Extract peak summary data from Zetasizer meta fields.
+ * Meta key patterns for overall distribution means.
+ */
+const OVERALL_MEAN_KEYS: Array<{
+  metaKey: string;
+  key: keyof DLSDistribution;
+}> = [
+  { metaKey: 'Intensity Mean (d.nm)', key: 'intensity' },
+  { metaKey: 'Volume Mean (d.nm)', key: 'volume' },
+  { metaKey: 'Number Mean (d.nm)', key: 'number' },
+];
+
+/**
+ * Extract overall distribution means from meta keys.
  *
- * Supports "Intensity peak N (d.nm)" and "Intensity Width Peak N (d.nm)"
- * column patterns. Peaks with all-zero values are filtered out.
+ * Looks for "Intensity Mean (d.nm)", "Volume Mean (d.nm)", "Number Mean (d.nm)".
+ * @param record - Parsed Zetasizer record
+ * @returns Overall size distribution averages, or undefined if none found
+ */
+function extractAverage(record: ZetasizerRecord): DLSDistribution | undefined {
+  const average: DLSDistribution = {};
+
+  for (const { metaKey, key } of OVERALL_MEAN_KEYS) {
+    const value = getNumber(record.meta, metaKey);
+    if (value !== undefined) {
+      average[key] = { mean: { value, units: 'nm' } };
+    }
+  }
+
+  if (Object.keys(average).length === 0) {
+    return undefined;
+  }
+
+  return average;
+}
+
+/**
+ * Patterns matching per-peak meta keys from Zetasizer exports.
+ *
+ * Examples: "Intensity peak 1 (d.nm)", "Intensity Width Peak 1 (d.nm)",
+ * "Volume Peak 2 (d.nm)", "Number Width Peak 3 (d.nm)"
+ */
+const PEAK_MEAN_PATTERN =
+  /^(?<dist>Intensity|Volume|Number)\s+peak\s+(?<n>\d+)/i;
+const PEAK_WIDTH_PATTERN =
+  /^(?<dist>Intensity|Volume|Number)\s+width\s+peak\s+(?<n>\d+)/i;
+
+const META_DISTRIBUTION_MAP: Record<string, keyof DLSDistribution> = {
+  intensity: 'intensity',
+  volume: 'volume',
+  number: 'number',
+};
+
+/**
+ * Extract per-peak distribution summaries from meta keys.
+ *
+ * Scans meta for "Intensity peak N", "Intensity Width Peak N", etc.
+ * Peaks with zero mean and zero width are filtered out. When only one
+ * peak is detected, overall means from arrays (volume, number) are used
+ * to enrich the peak.
  * @param record - Parsed Zetasizer record
  * @returns Array of distributions, one per detected particle population
  */
@@ -284,31 +320,52 @@ function extractDistributions(record: ZetasizerRecord): DLSDistribution[] {
   for (const [key, value] of Object.entries(record.meta)) {
     if (typeof value !== 'number' || value === 0) continue;
 
-    for (const { pattern, property, key: distributionKey } of PEAK_PATTERNS) {
-      const match = pattern.exec(key);
-      if (!match?.groups?.n) continue;
-
+    let match = PEAK_MEAN_PATTERN.exec(key);
+    if (match?.groups?.dist && match.groups.n) {
+      const distributionKey =
+        META_DISTRIBUTION_MAP[match.groups.dist.toLowerCase()];
+      if (!distributionKey) continue;
       const peakNumber = Number(match.groups.n);
 
-      let distribution = peakMap.get(peakNumber);
-      if (!distribution) {
-        distribution = {};
-        peakMap.set(peakNumber, distribution);
-      }
-
+      const distribution = getOrCreateDistribution(peakMap, peakNumber);
       let stats = distribution[distributionKey];
       if (!stats) {
         stats = {};
         distribution[distributionKey] = stats;
       }
+      stats.mean = { value, units: 'nm' };
+      continue;
+    }
 
-      if (property === 'mean') {
-        stats.mean = { value, units: 'nm' };
-      } else if (property === 'standardDeviation') {
-        stats.standardDeviation = { value, units: 'nm' };
+    match = PEAK_WIDTH_PATTERN.exec(key);
+    if (match?.groups?.dist && match.groups.n) {
+      const distributionKey =
+        META_DISTRIBUTION_MAP[match.groups.dist.toLowerCase()];
+      if (!distributionKey) continue;
+      const peakNumber = Number(match.groups.n);
+
+      const distribution = getOrCreateDistribution(peakMap, peakNumber);
+      let stats = distribution[distributionKey];
+      if (!stats) {
+        stats = {};
+        distribution[distributionKey] = stats;
       }
+      stats.standardDeviation = { value, units: 'nm' };
+    }
+  }
 
-      break;
+  // When there's exactly one peak, enrich it with overall means
+  // from distributions that don't have per-peak data.
+  if (peakMap.size === 1) {
+    const onlyPeak = peakMap.values().next().value;
+    if (onlyPeak) {
+      for (const { metaKey, key } of OVERALL_MEAN_KEYS) {
+        if (onlyPeak[key]) continue;
+        const value = getNumber(record.meta, metaKey);
+        if (value !== undefined) {
+          onlyPeak[key] = { mean: { value, units: 'nm' } };
+        }
+      }
     }
   }
 
@@ -322,6 +379,24 @@ function extractDistributions(record: ZetasizerRecord): DLSDistribution[] {
   }
 
   return distributions;
+}
+
+/**
+ * Get or create a DLSDistribution for a given peak number.
+ * @param peakMap - Map of peak numbers to distributions
+ * @param peakNumber - Peak number
+ * @returns The distribution for the given peak
+ */
+function getOrCreateDistribution(
+  peakMap: Map<number, DLSDistribution>,
+  peakNumber: number,
+): DLSDistribution {
+  let distribution = peakMap.get(peakNumber);
+  if (!distribution) {
+    distribution = {};
+    peakMap.set(peakNumber, distribution);
+  }
+  return distribution;
 }
 
 /**

@@ -128,6 +128,19 @@ test('chc file: meta.cheminfo contains cumulants and peak data', () => {
   });
   expect(cheminfo?.meta?.intercept).toBe(0.941);
 
+  expect(cheminfo?.meta?.average?.intensity?.mean).toStrictEqual({
+    value: 116.1,
+    units: 'nm',
+  });
+  expect(cheminfo?.meta?.average?.volume?.mean).toStrictEqual({
+    value: 99.31,
+    units: 'nm',
+  });
+  expect(cheminfo?.meta?.average?.number?.mean).toStrictEqual({
+    value: 78.38,
+    units: 'nm',
+  });
+
   const distributions = cheminfo?.meta?.distributions;
 
   expect(distributions).toHaveLength(1);
@@ -142,6 +155,14 @@ test('chc file: meta.cheminfo contains cumulants and peak data', () => {
     value: 32.94,
     units: 'nm',
   });
+  expect(population?.volume?.mean).toStrictEqual({
+    value: 99.31,
+    units: 'nm',
+  });
+  expect(population?.number?.mean).toStrictEqual({
+    value: 78.38,
+    units: 'nm',
+  });
 });
 
 test('settings contain measurement parameters', () => {
@@ -154,4 +175,3 @@ test('settings contain measurement parameters', () => {
   expect(meta?.['Measurement Position (mm)']).toBe(3);
   expect(meta?.Attenuator).toBe(7);
 });
-

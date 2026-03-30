@@ -156,6 +156,20 @@ test('meta.cheminfo contains DLS analysis results', async () => {
     value: expect.closeTo(13500.15, 0),
     units: 'kcps',
   });
+  expect(cheminfo?.meta?.intercept).toBeCloseTo(0.931, 2);
+
+  expect(cheminfo?.meta?.average?.intensity?.mean).toStrictEqual({
+    value: expect.closeTo(492.17, 1),
+    units: 'nm',
+  });
+  expect(cheminfo?.meta?.average?.volume?.mean).toStrictEqual({
+    value: expect.closeTo(527.82, 1),
+    units: 'nm',
+  });
+  expect(cheminfo?.meta?.average?.number?.mean).toStrictEqual({
+    value: expect.closeTo(413.77, 1),
+    units: 'nm',
+  });
 
   const distributions = cheminfo?.meta?.distributions;
 

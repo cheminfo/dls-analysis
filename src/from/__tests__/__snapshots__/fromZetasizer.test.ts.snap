@@ -4,7 +4,7 @@ exports[`chc file snapshot 1`] = `
 [
   {
     "dataType": "DLS measurement",
-    "id": "eyp56y7rahe",
+    "id": "1",
     "meta": {
       "%Pd Peak 1 (Percent)": 28.4,
       "%Pd Peak 2 (Percent)": 0,
@@ -454,7 +454,7 @@ exports[`chc file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "9mmdlory6fh",
+    "id": "2",
     "meta": {
       "%Pd Peak 1 (Percent)": 30.9,
       "%Pd Peak 2 (Percent)": 0,
@@ -904,7 +904,7 @@ exports[`chc file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "ajp0ou5ena5",
+    "id": "3",
     "meta": {
       "%Pd Peak 1 (Percent)": 34.1,
       "%Pd Peak 2 (Percent)": 0,
@@ -1354,7 +1354,7 @@ exports[`chc file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "5b7k4p0frr6",
+    "id": "4",
     "meta": {
       "%Pd Peak 1 (Percent)": 26.7,
       "%Pd Peak 2 (Percent)": 0,
@@ -1809,7 +1809,7 @@ exports[`mxd file snapshot 1`] = `
 [
   {
     "dataType": "DLS measurement",
-    "id": "tqxbzgr1lza",
+    "id": "1",
     "meta": {
       "Actual Transmission Factor": 100,
       "Analysis Date": "Wednesday, 25 February 2026 16:02:06",
@@ -2176,7 +2176,7 @@ exports[`mxd file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "rq23flnhwvj",
+    "id": "2",
     "meta": {
       "Actual Transmission Factor": 100,
       "Analysis Date": "Wednesday, 25 February 2026 16:03:48",
@@ -2543,7 +2543,7 @@ exports[`mxd file snapshot 1`] = `
   },
   {
     "dataType": "DLS measurement",
-    "id": "kwjwj28blaj",
+    "id": "3",
     "meta": {
       "Actual Transmission Factor": 100,
       "Analysis Date": "Wednesday, 25 February 2026 16:05:30",

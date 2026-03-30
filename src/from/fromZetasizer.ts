@@ -80,7 +80,10 @@ export function fromZetasizer(
   const analysis = new Analysis(options);
   const records = fromText(data);
 
-  for (const record of records) {
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    if (!record) continue;
+
     const variables = buildVariables(record);
     if (!variables) continue;
 
@@ -91,6 +94,7 @@ export function fromZetasizer(
     }
 
     analysis.pushSpectrum(variables, {
+      id: String(i + 1),
       title: extractTitle(record),
       dataType: 'DLS measurement',
       meta,

@@ -37,6 +37,20 @@ Each measurement contains the following variables:
 | r   | Relaxation time       | µs    | Relaxation Times                     |
 | f   | Form factor           |       | Form Factor                          |
 
+### Selector for visualization
+
+```html
+<select name="selector.variables">
+  <option value="y vs x">Intensity versus particle diameter</option>
+  <option value="v vs x">Volume versus particle diameter</option>
+  <option value="n vs x">Number versus particle diameter</option>
+  <option value="w vs x">Molecular weight versus particle diameter</option>
+  <option value="d vs x">Diffusion coefficient versus particle diameter</option>
+  <option value="r vs x">Relaxation time versus particle diameter</option>
+  <option value="f vs x">Form factor versus particle diameter</option>
+</select>
+```
+
 Metadata includes Z-Average, Polydispersity Index, operator name, dispersant and material properties.
 
 Settings include instrument manufacturer, model, serial number, detector angle, laser wavelength, temperature, and more.
